@@ -28,7 +28,6 @@ small{color:#888}
 <body>
 <div class="top"><div class="badge">🎮 LAMBAMBA</div><div class="badge" onclick="openM()">+ Deposit</div></div>
 <div class="bal">GHS <span id="bal">0.00</span></div>
-
 <div class="card">
 <div class="stats">
 <div class="stat">Entry<br><b>GHS 2</b></div>
@@ -43,8 +42,6 @@ small{color:#888}
 <button class="dark" onclick="openW()" style="margin-top:10px">WITHDRAW WINNINGS</button>
 <p style="font-size:11px;opacity:.5;margin-top:10px">Win = Taps x 0.25 GHS • 30 taps = GHS 7.5 • 60 taps = GHS 15 MAX</p>
 </div>
-
-<!-- DEPOSIT -->
 <div id="m" class="modal"><div class="box">
 <h3 style="margin:0 0 6px">Deposit Funds</h3><small>MoMo & Card via Paystack</small>
 <input id="amt" type="number" value="20" oninput="document.getElementById('pAmt').innerText=this.value">
@@ -52,8 +49,6 @@ small{color:#888}
 <button class="green" onclick="pay()">Pay GHS <span id="pAmt">20</span></button>
 <button class="dark" style="color:#000;background:#eee;margin-top:8px" onclick="closeM()">Cancel</button>
 </div></div>
-
-<!-- WITHDRAW -->
 <div id="w" class="modal"><div class="box">
 <h3 style="margin:0">Withdraw</h3>
 <p style="font-size:14px">Send WhatsApp to Admin with your balance screenshot</p>
@@ -62,11 +57,10 @@ small{color:#888}
 <button class="dark" style="color:#000;background:#eee;margin-top:8px" onclick="closeW()">Close</button>
 <p style="font-size:11px;color:#666;margin-top:10px">Min withdrawal GHS 20 • Paid in 5-10 mins</p>
 </div></div>
-
 <script>
 let bal=Number(localStorage.getItem('lamba_bal')||0);
 let taps=0, timeLeft=10, timer=null, playing=false, earned=0;
-const balEl=document.getElementById('bal'), tapsEl=document.getElementById('taps'), timeEl=document.getElementById('time'), coin=document.getElementById('coin'), arena=document.getElementById('arena'), startTxt=document.getElementById('startTxt');
+const balEl=document.getElementById('bal'), tapsEl=document.getElementById('taps'), timeEl=document.getElementById('time'), coin=document.getElementById('coin'), startTxt=document.getElementById('startTxt');
 function render(){balEl.innerText=bal.toFixed(2); tapsEl.innerText=taps;}
 render();
 function openM(){document.getElementById('m').style.display='flex'}function closeM(){document.getElementById('m').style.display='none'}
@@ -91,15 +85,15 @@ function moveCoin(){coin.style.left=Math.random()*70+5+'%';coin.style.top=Math.r
 function tap(e){if(!playing)return;taps++;render();moveCoin();if(navigator.vibrate)navigator.vibrate(20);}
 function endGame(){
  clearInterval(timer);playing=false;coin.style.display='none';startTxt.style.display='block';timeEl.innerText='10s';
- earned=Math.min(taps*0.25,15); // max 15
- if(taps>=12){bal+=earned;localStorage.setItem('lamba_bal',bal);render();alert('🎉 You tapped '+taps+' times!\nYou WON GHS '+earned.toFixed(2)+' added to balance!');}
+ earned=Math.min(taps*0.25,15);
+ if(taps>=12){bal+=earned;localStorage.setItem('lamba_bal',bal);render();alert('🎉 You tapped '+taps+' times! You WON GHS '+earned.toFixed(2));}
  else{alert('😢 You tapped '+taps+' times. Need 12+ taps to win. Try again!');}
  document.getElementById('playBtn').innerText='PLAY AGAIN - GHS 2';taps=0;render();
 }
 function withdrawReq(){
  let a=Number(document.getElementById('wAmt').value);if(!a||a<20)return alert('Min GHS 20');if(a>bal)return alert('Insufficient balance');
  let msg=`Hello Admin, I want to withdraw GHS ${a} from Lambamba. My balance is GHS ${bal.toFixed(2)}`;
- window.open('https://wa.me/233000000000?text='+encodeURIComponent(msg),'_blank');
+ window.open('https://wa.me/233537613225?text='+encodeURIComponent(msg),'_blank');
 }
 </script>
 </body>
