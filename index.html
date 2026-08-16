@@ -1,61 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lambamba Coin Rush - Real Cashout</title>
+<title>Lambamba - Play & Win</title>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <style>
-body{background:#0b0f1a;color:#fff;font-family:Arial;text-align:center;padding:20px}
-.card{background:#151b2d;padding:20px;border-radius:20px;max-width:400px;margin:auto}
-.coin{width:150px;height:150px;background:gold;border-radius:50%;margin:20px auto;display:flex;align-items:center;justify-content:center;font-size:60px;box-shadow:0 0 30px gold;cursor:pointer;user-select:none}
-button{width:100%;padding:14px;margin:6px 0;border:0;border-radius:12px;font-weight:bold;cursor:pointer}
-.deposit{background:#00ff88;color:#000}
-.withdraw{background:#ffcc00;color:#000}
+body{margin:0;background:#0f0f0f;color:#fff;font-family:Arial;text-align:center;padding:20px}
+.card{background:#1e1e1e;padding:20px;border-radius:18px;max-width:380px;margin:30px auto;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.balance{font-size:36px;color:#00e676;font-weight:bold;margin:10px 0}
+button{width:100%;padding:16px;border:0;border-radius:12px;font-size:17px;font-weight:bold;margin-top:12px;cursor:pointer}
+.deposit{background:#00c853;color:#fff}
+.withdraw{background:#333;color:#fff;border:1px solid #444}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);justify-content:center;align-items:center;z-index:999}
+.box{background:#fff;color:#000;padding:22px;border-radius:16px;width:90%;max-width:340px}
+input{width:94%;padding:13px;margin:7px 0;border:1px solid #ccc;border-radius:10px;font-size:16px}
 </style>
 </head>
 <body>
+<h1>🎮 LAMBAMBA</h1>
 <div class="card">
-<h2>Lambamba Coin Rush 🪙</h2>
-<div class="coin" onclick="tap()">L</div>
-<p>Coins: <span id="coins">0</span> | Balance: GHS <span id="bal">0.00</span></p>
-<button class="deposit" onclick="deposit()">DEPOSIT WITH PAYSTACK (MoMo)</button>
-<button class="withdraw" onclick="withdraw()">WITHDRAW (MIN GHS 50)</button>
-<p style="font-size:12px;opacity:.6">1 coin = GHS 0.01 | Withdraw to MoMo<br>Real money mode enabled</p>
-<input id="phone" placeholder="MoMo Number for Withdraw" style="width:100%;padding:12px;border-radius:10px;border:0;margin-top:10px">
+<p style="opacity:.7">Your Balance</p>
+<div class="balance">GHS <span id="bal">0.00</span></div>
+<button class="deposit" onclick="openM()">DEPOSIT (MoMo & Card)</button>
+<button class="withdraw" onclick="alert('Withdraw via WhatsApp Admin')">WITHDRAW</button>
 </div>
+
+<div id="m" class="modal"><div class="box">
+<h3 style="margin-top:0">Deposit Funds</h3>
+<input id="amt" type="number" placeholder="Amount Min GHS 5" value="20" oninput="document.getElementById('pAmt').innerText=this.value">
+<input id="email" type="email" value="linkinglimited5@gmail.com">
+<button class="deposit" onclick="pay()">Pay GHS <span id="pAmt">20</span></button>
+<button style="background:#eee" onclick="closeM()">Cancel</button>
+<p style="font-size:11px;color:#666;margin-top:12px">🔒 Secured by Paystack - MTN, Telecel, AirtelTigo supported</p>
+</div></div>
+
 <script>
-let coins = parseInt(localStorage.getItem('coins'))||0;
-let bal = parseFloat(localStorage.getItem('bal'))||0;
-update();
-function tap(){coins++; if(coins%10==0){bal+=0.10;} update();}
-function update(){document.getElementById('coins').innerText=coins; document.getElementById('bal').innerText=bal.toFixed(2); localStorage.setItem('coins',coins); localStorage.setItem('bal',bal);}
-function deposit(){
- let amount = prompt("Enter amount to deposit in GHS (Min 5):","20");
- if(!amount) return;
- let email = prompt("Enter your email for receipt:","player@lambamba.com");
- // *** LIVE KEY HARDCODED - FIXED ***
- let handler = PaystackPop.setup({
-   key: 'pk_live_c3cbce0387fd58c85d6c0940035dba6b9b98724f',
-   email: email,
-   amount: Math.floor(parseFloat(amount)*100),
-   currency: 'GHS',
-   channels: ['mobile_money','card'],
-   callback: function(response){
-     alert('Payment Success! Ref: '+response.reference);
-     let added = parseFloat(amount);
-     bal += added; coins += Math.floor(added*100);
-     update();
-   },
-   onClose: function(){ alert('Payment window closed'); }
- });
- handler.openIframe();
-}
-function withdraw(){
- if(bal < 50){ alert('Min withdrawal GHS 50. Your bal: GHS '+bal.toFixed(2)); return;}
- let phone = document.getElementById('phone').value;
- if(!phone){ alert('Enter MoMo number'); return;}
- alert('Withdrawal request GHS '+bal.toFixed(2)+' to '+phone+' submitted! We will pay within 2 hours.');
- bal = 0; update();
+let bal=Number(localStorage.getItem('lamba_bal')||0);
+document.getElementById('bal').innerText=bal.toFixed(2);
+function openM(){document.getElementById('m').style.display='flex'}
+function closeM(){document.getElementById('m').style.display='none'}
+function pay(){
+ let a=Number(document.getElementById('amt').value);
+ let e=document.getElementById('email').value.trim();
+ if(a<5)return alert('Min GHS 5');
+ if(!e)return alert('Enter email');
+ PaystackPop.setup({
+  key:'pk_live_c3cbce0387fd58c85d6c0940035dba6b9b98724f',
+  email:e,
+  amount:a*100,
+  currency:'GHS',
+  channels:['mobile_money','card'],
+  callback:function(r){
+   bal+=a;localStorage.setItem('lamba_bal',bal);
+   document.getElementById('bal').innerText=bal.toFixed(2);
+   closeM();alert('✅ SUCCESS! GHS '+a+' Added! Ref: '+r.reference);
+  },
+  onClose:function(){alert('Payment cancelled')}
+ }).openIframe();
 }
 </script>
 </body>
