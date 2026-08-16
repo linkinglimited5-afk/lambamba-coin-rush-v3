@@ -21,7 +21,7 @@ button{width:100%;padding:16px;border:0;border-radius:14px;font-size:16px;font-w
 .stat{background:#111;padding:10px;border-radius:12px;font-size:13px;border:1px solid #222}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);justify-content:center;align-items:center;z-index:99;padding:16px}
 .box{background:#fff;color:#111;padding:20px;border-radius:18px;width:100%;max-width:360px}
-input{width:100%;padding:14px;margin:8px 0;border:1px solid #ccc;border-radius:12px;font-size:16px}
+input,select{width:100%;padding:14px;margin:8px 0;border:1px solid #ccc;border-radius:12px;font-size:16px}
 small{color:#888}
 </style>
 </head>
@@ -50,34 +50,37 @@ small{color:#888}
 <button class="dark" style="color:#000;background:#eee;margin-top:8px" onclick="closeM()">Cancel</button>
 </div></div>
 <div id="w" class="modal"><div class="box">
-<h3 style="margin:0">Withdraw</h3>
-<p style="font-size:14px">Send WhatsApp to Admin with your balance screenshot</p>
+<h3 style="margin:0">Withdraw to MoMo</h3>
+<p style="font-size:13px;color:#444">Auto-paid by Paystack instantly</p>
 <input id="wAmt" type="number" placeholder="Amount to withdraw">
-<button class="green" onclick="withdrawReq()">Request Withdraw on WhatsApp</button>
+<input id="wPhone" type="tel" placeholder="MoMo Number 0XXXXXXXXX">
+<select id="wNetwork"><option value="mtn">MTN</option><option value="vod">Telecel (Vodafone)</option><option value="atl">AirtelTigo</option></select>
+<input id="wName" type="text" placeholder="Full Name on MoMo">
+<button class="green" id="wBtn" onclick="withdrawReq()">WITHDRAW NOW</button>
 <button class="dark" style="color:#000;background:#eee;margin-top:8px" onclick="closeW()">Close</button>
-<p style="font-size:11px;color:#666;margin-top:10px">Min withdrawal GHS 20 • Paid in 5-10 mins</p>
+<p style="font-size:11px;color:#666;margin-top:10px">Min GHS 20 • Instant payout</p>
 </div></div>
 <script>
-let bal=Number(localStorage.getItem('lamba_bal')||0);
+let bal=Number(localStorage.getItem('lamba_bal')||localStorage.getItem('balance')||0);
 let taps=0, timeLeft=10, timer=null, playing=false, earned=0;
 const balEl=document.getElementById('bal'), tapsEl=document.getElementById('taps'), timeEl=document.getElementById('time'), coin=document.getElementById('coin'), startTxt=document.getElementById('startTxt');
 function render(){balEl.innerText=bal.toFixed(2); tapsEl.innerText=taps;}
 render();
 function openM(){document.getElementById('m').style.display='flex'}function closeM(){document.getElementById('m').style.display='none'}
-function openW(){document.getElementById('w').style.display='flex'}function closeW(){document.getElementById('w').style.display='none'}
+function openW(){document.getElementById('wAmt').value=bal>=20?bal:'';document.getElementById('w').style.display='flex'}function closeW(){document.getElementById('w').style.display='none'}
 function pay(){
  let a=Number(document.getElementById('amt').value);let e=document.getElementById('email').value.trim();
  if(a<5)return alert('Min GHS 5'); if(!e)return alert('Enter email');
  PaystackPop.setup({
   key:'pk_live_c3cbce0387fd58c85d6c0940035dba6b9b98724f',email:e,amount:a*100,currency:'GHS',channels:['mobile_money','card'],
-  callback:function(r){bal+=a;localStorage.setItem('lamba_bal',bal);render();closeM();alert('✅ GHS '+a+' Added! Ref:'+r.reference);},
+  callback:function(r){bal+=a;localStorage.setItem('lamba_bal',bal);localStorage.setItem('balance',bal);render();closeM();alert('✅ GHS '+a+' Added! Ref:'+r.reference);},
   onClose:function(){}
  }).openIframe();
 }
 function startGame(){
  if(playing)return;
  if(bal<2)return alert('Low balance! Deposit at least GHS 5'),openM();
- bal-=2;localStorage.setItem('lamba_bal',bal);render();
+ bal-=2;localStorage.setItem('lamba_bal',bal);localStorage.setItem('balance',bal);render();
  taps=0;timeLeft=10;playing=true;earned=0;document.getElementById('playBtn').innerText='PLAYING...';startTxt.style.display='none';coin.style.display='block';moveCoin();
  timer=setInterval(()=>{timeLeft--;timeEl.innerText=timeLeft+'s';if(timeLeft<=0)endGame();},1000);
 }
@@ -86,14 +89,33 @@ function tap(e){if(!playing)return;taps++;render();moveCoin();if(navigator.vibra
 function endGame(){
  clearInterval(timer);playing=false;coin.style.display='none';startTxt.style.display='block';timeEl.innerText='10s';
  earned=Math.min(taps*0.25,15);
- if(taps>=12){bal+=earned;localStorage.setItem('lamba_bal',bal);render();alert('🎉 You tapped '+taps+' times! You WON GHS '+earned.toFixed(2));}
+ if(taps>=12){bal+=earned;localStorage.setItem('lamba_bal',bal);localStorage.setItem('balance',bal);render();alert('🎉 You tapped '+taps+' times! You WON GHS '+earned.toFixed(2));}
  else{alert('😢 You tapped '+taps+' times. Need 12+ taps to win. Try again!');}
  document.getElementById('playBtn').innerText='PLAY AGAIN - GHS 2';taps=0;render();
 }
-function withdrawReq(){
- let a=Number(document.getElementById('wAmt').value);if(!a||a<20)return alert('Min GHS 20');if(a>bal)return alert('Insufficient balance');
- let msg=`Hello Admin, I want to withdraw GHS ${a} from Lambamba. My balance is GHS ${bal.toFixed(2)}`;
- window.open('https://wa.me/233537613225?text='+encodeURIComponent(msg),'_blank');
+async function withdrawReq(){
+ let a=Number(document.getElementById('wAmt').value);
+ let phone=document.getElementById('wPhone').value.trim();
+ let name=document.getElementById('wName').value.trim();
+ let network=document.getElementById('wNetwork').value;
+ if(!a||a<20)return alert('Min GHS 20');if(a>bal)return alert('Insufficient balance, you have GHS '+bal.toFixed(2));
+ if(!phone||phone.length<10)return alert('Enter valid MoMo number');
+ if(!name)return alert('Enter MoMo name');
+ document.getElementById('wBtn').innerText='Processing...';document.getElementById('wBtn').disabled=true;
+ try{
+  const res=await fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a,momo_number:phone,name,network})});
+  const data=await res.json();
+  if(data.success||data.status===true){
+    bal-=a;localStorage.setItem('lamba_bal',bal);localStorage.setItem('balance',bal);render();closeW();
+    alert('✅ SUCCESS! GHS '+a+' sent to '+phone+'. Check your MoMo!');
+  }else{
+    alert('❌ Failed: '+(data.message||data.error||'Try again'));
+    document.getElementById('wBtn').innerText='WITHDRAW NOW';document.getElementById('wBtn').disabled=false;
+  }
+ }catch(e){
+  alert('Network error: '+e.message);
+  document.getElementById('wBtn').innerText='WITHDRAW NOW';document.getElementById('wBtn').disabled=false;
+ }
 }
 </script>
 </body>
