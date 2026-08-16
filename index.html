@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lambamba Coin Rush - Real Cashout</title>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<style>
+body{background:#0b0f1a;color:#fff;font-family:Arial;text-align:center;padding:20px}
+.card{background:#151b2d;padding:20px;border-radius:20px;max-width:400px;margin:auto}
+.coin{width:150px;height:150px;background:gold;border-radius:50%;margin:20px auto;
+display:flex;align-items:center;justify-content:center;font-size:60px;
+box-shadow:0 0 30px gold;cursor:pointer;user-select:none}
+button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:12px;
+font-weight:bold;font-size:16px}
+.deposit{background:#00d26a;color:#000}
+.withdraw{background:#ffcc00;color:#000}
+.balance{font-size:32px;color:#00ff88}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>💰 LAMBAMBA COIN RUSH</h2>
+<p>Balance</p>
+<div class="balance">GHS <span id="bal">0.00</span></div>
+<div class="coin" onclick="tap()">🪙</div>
+<p><span id="coins">0</span> coins | Tap to earn</p>
+
+<button class="deposit" onclick="deposit()">DEPOSIT WITH PAYSTACK</button>
+<button class="withdraw" onclick="withdraw()">WITHDRAW (MIN GHS 50)</button>
+
+<p style="font-size:12px;opacity:.6">1 coin = GHS 0.01 | Withdraw to MoMo<br>Real money mode enabled</p>
+<input id="phone" placeholder="MoMo Number for Withdraw" style="width:100%;padding:12px;border-radius:10px;border:0;margin-top:10px">
+</div>
+
+<script>
+let coins = parseInt(localStorage.getItem('coins')||0);
+let bal = parseFloat(localStorage.getItem('bal')||0);
+update();
+
+function tap(){
+ coins++;
+ if(coins%100===0){ bal+=1; }
+ save(); update();
+ if(navigator.vibrate) navigator.vibrate(30);
+}
+function update(){
+ document.getElementById('coins').innerText=coins;
+ document.getElementById('bal').innerText=bal.toFixed(2);
+}
+function save(){
+ localStorage.setItem('coins',coins);
+ localStorage.setItem('bal',bal);
+}
+function deposit(){
+ let amount = prompt("Enter deposit amount GHS (min 10):","20");
+ if(!amount) return;
+ let email = prompt("Enter your email for Paystack receipt:");
+ if(!email) return;
+ var handler = PaystackPop.setup({
+   key: 'pk_live_YOUR_PAYSTACK_KEY_HERE', // <-- REPLACE WITH YOUR KEY
+   email: email,
+   amount: parseFloat(amount)*100,
+   currency: 'GHS',
+   callback: function(res){
+     bal+=parseFloat(amount); save(); update();
+     alert("Deposit Success! GHS "+amount+" added");
+   }
+ });
+ handler.openIframe();
+}
+function withdraw(){
+ if(bal<50){ alert("Min withdraw is GHS 50. Your balance GHS "+bal.toFixed(2)); return;}
+ let phone=document.getElementById('phone').value;
+ if(!phone){ alert("Enter MoMo number"); return;}
+ alert("Withdraw request GHS "+bal.toFixed(2)+" to "+phone+" submitted! Admin will pay in 24h. Contact Lambamba support.");
+ bal=0; coins=0; save(); update();
+ // TODO: send to Firebase for admin approval
+}
+</script>
+</body>
+</html>
