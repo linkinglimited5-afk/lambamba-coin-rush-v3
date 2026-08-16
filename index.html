@@ -2,62 +2,104 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lambamba - Play & Win</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>LAMBAMBA - Coin Rush</title>
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <style>
-body{margin:0;background:#0f0f0f;color:#fff;font-family:Arial;text-align:center;padding:20px}
-.card{background:#1e1e1e;padding:20px;border-radius:18px;max-width:380px;margin:30px auto;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-.balance{font-size:36px;color:#00e676;font-weight:bold;margin:10px 0}
-button{width:100%;padding:16px;border:0;border-radius:12px;font-size:17px;font-weight:bold;margin-top:12px;cursor:pointer}
-.deposit{background:#00c853;color:#fff}
-.withdraw{background:#333;color:#fff;border:1px solid #444}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);justify-content:center;align-items:center;z-index:999}
-.box{background:#fff;color:#000;padding:22px;border-radius:16px;width:90%;max-width:340px}
-input{width:94%;padding:13px;margin:7px 0;border:1px solid #ccc;border-radius:10px;font-size:16px}
+*{box-sizing:border-box}body{margin:0;background:#0a0a0a;color:#fff;font-family:Arial;text-align:center;padding:12px 14px 80px}
+.top{display:flex;justify-content:space-between;align-items:center;max-width:400px;margin:0 auto}
+.badge{background:#1a1a1a;padding:8px 14px;border-radius:20px;font-size:13px;border:1px solid #333}
+.bal{font-size:32px;color:#00e676;font-weight:900;margin:14px 0}
+.card{background:linear-gradient(145deg,#1e1e1e,#151515);padding:18px;border-radius:22px;max-width:400px;margin:10px auto;border:1px solid #2a2a2a}
+button{width:100%;padding:16px;border:0;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer}
+.green{background:#00c853;color:#fff;box-shadow:0 6px 18px rgba(0,200,83,.35)}
+.dark{background:#2a2a2a;color:#fff;border:1px solid #3a3a3a}
+.gamebox{height:260px;background:radial-gradient(circle at center,#1f1f1f,#0e0e0e);border-radius:18px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px dashed #333}
+.coin{font-size:68px;position:absolute;cursor:pointer;user-select:none;transition:transform .05s}
+.coin:active{transform:scale(1.25)}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
+.stat{background:#111;padding:10px;border-radius:12px;font-size:13px;border:1px solid #222}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);justify-content:center;align-items:center;z-index:99;padding:16px}
+.box{background:#fff;color:#111;padding:20px;border-radius:18px;width:100%;max-width:360px}
+input{width:100%;padding:14px;margin:8px 0;border:1px solid #ccc;border-radius:12px;font-size:16px}
+small{color:#888}
 </style>
 </head>
 <body>
-<h1>🎮 LAMBAMBA</h1>
+<div class="top"><div class="badge">🎮 LAMBAMBA</div><div class="badge" onclick="openM()">+ Deposit</div></div>
+<div class="bal">GHS <span id="bal">0.00</span></div>
+
 <div class="card">
-<p style="opacity:.7">Your Balance</p>
-<div class="balance">GHS <span id="bal">0.00</span></div>
-<button class="deposit" onclick="openM()">DEPOSIT (MoMo & Card)</button>
-<button class="withdraw" onclick="alert('Withdraw via WhatsApp Admin')">WITHDRAW</button>
+<div class="stats">
+<div class="stat">Entry<br><b>GHS 2</b></div>
+<div class="stat">Time<br><b id="time">10s</b></div>
+<div class="stat">Taps<br><b id="taps">0</b></div>
+</div>
+<div class="gamebox" id="arena" onclick="tap(event)">
+<div id="startTxt"><b style="font-size:20px">TAP TO START</b><br><small>Pay GHS 2 to play • Win up to GHS 15</small></div>
+<div id="coin" class="coin" style="display:none">🪙</div>
+</div>
+<button class="green" id="playBtn" onclick="startGame()" style="margin-top:14px">PLAY NOW - GHS 2</button>
+<button class="dark" onclick="openW()" style="margin-top:10px">WITHDRAW WINNINGS</button>
+<p style="font-size:11px;opacity:.5;margin-top:10px">Win = Taps x 0.25 GHS • 30 taps = GHS 7.5 • 60 taps = GHS 15 MAX</p>
 </div>
 
+<!-- DEPOSIT -->
 <div id="m" class="modal"><div class="box">
-<h3 style="margin-top:0">Deposit Funds</h3>
-<input id="amt" type="number" placeholder="Amount Min GHS 5" value="20" oninput="document.getElementById('pAmt').innerText=this.value">
+<h3 style="margin:0 0 6px">Deposit Funds</h3><small>MoMo & Card via Paystack</small>
+<input id="amt" type="number" value="20" oninput="document.getElementById('pAmt').innerText=this.value">
 <input id="email" type="email" value="linkinglimited5@gmail.com">
-<button class="deposit" onclick="pay()">Pay GHS <span id="pAmt">20</span></button>
-<button style="background:#eee" onclick="closeM()">Cancel</button>
-<p style="font-size:11px;color:#666;margin-top:12px">🔒 Secured by Paystack - MTN, Telecel, AirtelTigo supported</p>
+<button class="green" onclick="pay()">Pay GHS <span id="pAmt">20</span></button>
+<button class="dark" style="color:#000;background:#eee;margin-top:8px" onclick="closeM()">Cancel</button>
+</div></div>
+
+<!-- WITHDRAW -->
+<div id="w" class="modal"><div class="box">
+<h3 style="margin:0">Withdraw</h3>
+<p style="font-size:14px">Send WhatsApp to Admin with your balance screenshot</p>
+<input id="wAmt" type="number" placeholder="Amount to withdraw">
+<button class="green" onclick="withdrawReq()">Request Withdraw on WhatsApp</button>
+<button class="dark" style="color:#000;background:#eee;margin-top:8px" onclick="closeW()">Close</button>
+<p style="font-size:11px;color:#666;margin-top:10px">Min withdrawal GHS 20 • Paid in 5-10 mins</p>
 </div></div>
 
 <script>
 let bal=Number(localStorage.getItem('lamba_bal')||0);
-document.getElementById('bal').innerText=bal.toFixed(2);
-function openM(){document.getElementById('m').style.display='flex'}
-function closeM(){document.getElementById('m').style.display='none'}
+let taps=0, timeLeft=10, timer=null, playing=false, earned=0;
+const balEl=document.getElementById('bal'), tapsEl=document.getElementById('taps'), timeEl=document.getElementById('time'), coin=document.getElementById('coin'), arena=document.getElementById('arena'), startTxt=document.getElementById('startTxt');
+function render(){balEl.innerText=bal.toFixed(2); tapsEl.innerText=taps;}
+render();
+function openM(){document.getElementById('m').style.display='flex'}function closeM(){document.getElementById('m').style.display='none'}
+function openW(){document.getElementById('w').style.display='flex'}function closeW(){document.getElementById('w').style.display='none'}
 function pay(){
- let a=Number(document.getElementById('amt').value);
- let e=document.getElementById('email').value.trim();
- if(a<5)return alert('Min GHS 5');
- if(!e)return alert('Enter email');
+ let a=Number(document.getElementById('amt').value);let e=document.getElementById('email').value.trim();
+ if(a<5)return alert('Min GHS 5'); if(!e)return alert('Enter email');
  PaystackPop.setup({
-  key:'pk_live_c3cbce0387fd58c85d6c0940035dba6b9b98724f',
-  email:e,
-  amount:a*100,
-  currency:'GHS',
-  channels:['mobile_money','card'],
-  callback:function(r){
-   bal+=a;localStorage.setItem('lamba_bal',bal);
-   document.getElementById('bal').innerText=bal.toFixed(2);
-   closeM();alert('✅ SUCCESS! GHS '+a+' Added! Ref: '+r.reference);
-  },
-  onClose:function(){alert('Payment cancelled')}
+  key:'pk_live_c3cbce0387fd58c85d6c0940035dba6b9b98724f',email:e,amount:a*100,currency:'GHS',channels:['mobile_money','card'],
+  callback:function(r){bal+=a;localStorage.setItem('lamba_bal',bal);render();closeM();alert('✅ GHS '+a+' Added! Ref:'+r.reference);},
+  onClose:function(){}
  }).openIframe();
+}
+function startGame(){
+ if(playing)return;
+ if(bal<2)return alert('Low balance! Deposit at least GHS 5'),openM();
+ bal-=2;localStorage.setItem('lamba_bal',bal);render();
+ taps=0;timeLeft=10;playing=true;earned=0;document.getElementById('playBtn').innerText='PLAYING...';startTxt.style.display='none';coin.style.display='block';moveCoin();
+ timer=setInterval(()=>{timeLeft--;timeEl.innerText=timeLeft+'s';if(timeLeft<=0)endGame();},1000);
+}
+function moveCoin(){coin.style.left=Math.random()*70+5+'%';coin.style.top=Math.random()*65+10+'%';}
+function tap(e){if(!playing)return;taps++;render();moveCoin();if(navigator.vibrate)navigator.vibrate(20);}
+function endGame(){
+ clearInterval(timer);playing=false;coin.style.display='none';startTxt.style.display='block';timeEl.innerText='10s';
+ earned=Math.min(taps*0.25,15); // max 15
+ if(taps>=12){bal+=earned;localStorage.setItem('lamba_bal',bal);render();alert('🎉 You tapped '+taps+' times!\nYou WON GHS '+earned.toFixed(2)+' added to balance!');}
+ else{alert('😢 You tapped '+taps+' times. Need 12+ taps to win. Try again!');}
+ document.getElementById('playBtn').innerText='PLAY AGAIN - GHS 2';taps=0;render();
+}
+function withdrawReq(){
+ let a=Number(document.getElementById('wAmt').value);if(!a||a<20)return alert('Min GHS 20');if(a>bal)return alert('Insufficient balance');
+ let msg=`Hello Admin, I want to withdraw GHS ${a} from Lambamba. My balance is GHS ${bal.toFixed(2)}`;
+ window.open('https://wa.me/233000000000?text='+encodeURIComponent(msg),'_blank');
 }
 </script>
 </body>
