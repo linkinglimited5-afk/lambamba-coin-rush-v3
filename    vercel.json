@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/withdraw.js": {
+      "includeFiles": "api/withdraw.js"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/withdraw", "destination": "/api/withdraw.js" }
+  ]
+}
