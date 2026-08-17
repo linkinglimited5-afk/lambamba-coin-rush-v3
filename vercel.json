@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/withdraw.js": {
+      "includeFiles": "api/**"
+    }
+  }
+}
