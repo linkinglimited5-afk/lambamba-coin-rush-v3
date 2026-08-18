@@ -1,116 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>LAMBAMBA - Coin Rush</title>
-<script src="https://js.paystack.co/v1/inline.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAMBAMBA COIN RUSH</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#0a0a0a;color:#fff;font-family:Arial;text-align:center;padding:12px 14px 80px}
-.top{display:flex;justify-content:space-between;align-items:center;max-width:400px;margin:0 auto}
-.badge{background:#1a1a1a;padding:8px 14px;border-radius:20px;font-size:13px;border:1px solid #333}
-.bal{font-size:32px;color:#00e676;font-weight:900;margin:14px 0}
-.card{background:linear-gradient(145deg,#1e1e1e,#151515);padding:18px;border-radius:22px;max-width:400px;margin:10px auto;border:1px solid #2a2a2a}
-button{width:100%;padding:16px;border:0;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer}
-.green{background:#00c853;color:#fff;box-shadow:0 6px 18px rgba(0,200,83,.35)}
-.dark{background:#2a2a2a;color:#fff;border:1px solid #3a3a3a}
-.gamebox{height:260px;background:radial-gradient(circle at center,#1f1f1f,#0e0e0e);border-radius:18px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px dashed #333}
-.coin{font-size:68px;position:absolute;cursor:pointer;user-select:none;transition:transform .05s}
-.coin:active{transform:scale(1.25)}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
-.stat{background:#111;padding:10px;border-radius:12px;font-size:13px;border:1px solid #222}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);justify-content:center;align-items:center;z-index:99;padding:16px}
-.box{background:#fff;color:#111;padding:20px;border-radius:18px;width:100%;max-width:360px}
-input,select{width:100%;padding:14px;margin:8px 0;border:1px solid #ccc;border-radius:12px;font-size:16px}
-small{color:#888}
+body{margin:0;background:#0a0a0a;color:#fff;font-family:Arial}
+.btn{padding:14px;border:0;border-radius:10px;font-weight:bold;width:100%;margin:8px 0}
+input,select{width:100%;padding:14px;margin:8px 0;border-radius:8px;border:0;box-sizing:border-box}
+.card{background:#1a1a1a;padding:20px;border-radius:15px;margin:15px}
+#gameArea{text-align:center;padding:20px}
 </style>
 </head>
 <body>
-<div class="top"><div class="badge">🎮 LAMBAMBA</div><div class="badge" onclick="openM()">+ Deposit</div></div>
-<div class="bal">GHS <span id="bal">0.00</span></div>
+
+<!-- 1. REGISTRATION PAGE - FORCES PHONE NUMBER -->
+<div id="regPage" style="position:fixed;inset:0;background:#111;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+<div style="background:#222;padding:25px;border-radius:15px;width:100%;max-width:360px">
+<h2 style="color:#00ff88;text-align:center;margin:0">LAMBAMBA</h2>
+<p style="color:#aaa;text-align:center">Login with MoMo to play</p>
+<input id="rPhone" type="tel" placeholder="MoMo Number e.g 0537613225">
+<input id="rName" type="text" placeholder="MoMo Name e.g ROMANUS">
+<select id="rNet"><option>MTN</option><option>Vodafone</option><option>AirtelTigo</option></select>
+<button onclick="doReg()" class="btn" style="background:#00c853;color:#fff">ENTER GAME</button>
+</div>
+</div>
+
+<!-- 2. GAME AREA -->
+<div id="gameArea">
+<h1>💰 LAMBAMBA COIN RUSH</h1>
 <div class="card">
-<div class="stats">
-<div class="stat">Entry<br><b>GHS 2</b></div>
-<div class="stat">Time<br><b id="time">10s</b></div>
-<div class="stat">Taps<br><b id="taps">0</b></div>
+<h2>Balance: GHS <span id="bal">0.00</span></h2>
+<p id="userInfo" style="color:#aaa"></p>
+<button onclick="playGame()" class="btn" style="background:#ff9800;color:#fff;font-size:18px">🎮 PLAY & WIN GHS 5</button>
+<button onclick="openW()" class="btn" style="background:#00c853;color:#fff">💸 WITHDRAW</button>
 </div>
-<div class="gamebox" id="arena" onclick="tap(event)">
-<div id="startTxt"><b style="font-size:20px">TAP TO START</b><br><small>Pay GHS 2 to play • Win up to GHS 15</small></div>
-<div id="coin" class="coin" style="display:none">🪙</div>
 </div>
-<button class="green" id="playBtn" onclick="startGame()" style="margin-top:14px">PLAY NOW - GHS 2</button>
-<button class="dark" onclick="openW()" style="margin-top:10px">WITHDRAW WINNINGS</button>
-<p style="font-size:11px;opacity:.5;margin-top:10px">Win = Taps x 0.25 GHS • 30 taps = GHS 7.5 • 60 taps = GHS 15 MAX</p>
+
+<!-- 3. WITHDRAW MODAL -->
+<div id="wPage" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9998;align-items:center;justify-content:center;padding:20px">
+<div style="background:#222;padding:25px;border-radius:15px;width:100%;max-width:360px">
+<h3 style="text-align:center">Withdraw to MoMo</h3>
+<input id="wAmt" type="number" placeholder="Amount Min GHS 20">
+<input id="wPhone" type="tel" placeholder="0537613225">
+<input id="wName" type="text" placeholder="ROMANUS">
+<select id="wNetwork"><option>MTN</option><option>Vodafone</option><option>AirtelTigo</option></select>
+<button id="wBtn" onclick="withdrawReq()" class="btn" style="background:#00c853;color:#fff">WITHDRAW NOW</button>
+<button onclick="closeW()" class="btn" style="background:#444;color:#fff">CANCEL</button>
 </div>
-<div id="m" class="modal"><div class="box">
-<h3 style="margin:0 0 6px">Deposit Funds</h3><small>MoMo & Card via Paystack</small>
-<input id="amt" type="number" value="20" oninput="document.getElementById('pAmt').innerText=this.value">
-<input id="email" type="email" value="linkinglimited5@gmail.com">
-<button class="green" onclick="pay()">Pay GHS <span id="pAmt">20</span></button>
-<button class="dark" style="color:#000;background:#eee;margin-top:8px" onclick="closeM()">Cancel</button>
-</div></div>
-<div id="w" class="modal"><div class="box">
-<h3 style="margin:0">Withdraw to MoMo</h3>
-<p style="font-size:13px;color:#444">Auto-paid by Paystack instantly</p>
-<input id="wAmt" type="number" placeholder="Amount to withdraw">
-<input id="wPhone" type="tel" placeholder="MoMo Number 0XXXXXXXXX">
-<select id="wNetwork"><option value="mtn">MTN</option><option value="vod">Telecel (Vodafone)</option><option value="atl">AirtelTigo</option></select>
-<input id="wName" type="text" placeholder="Full Name on MoMo">
-<button class="green" id="wBtn" onclick="withdrawReq()">WITHDRAW NOW</button>
-<button class="dark" style="color:#000;background:#eee;margin-top:8px" onclick="closeW()">Close</button>
-<p style="font-size:11px;color:#666;margin-top:10px">Min GHS 20 • Instant payout</p>
-</div></div>
+</div>
+
 <script>
-let bal=Number(localStorage.getItem('lamba_bal')||localStorage.getItem('balance')||0);
-let taps=0, timeLeft=10, timer=null, playing=false, earned=0;
-const balEl=document.getElementById('bal'), tapsEl=document.getElementById('taps'), timeEl=document.getElementById('time'), coin=document.getElementById('coin'), startTxt=document.getElementById('startTxt');
-function render(){balEl.innerText=bal.toFixed(2); tapsEl.innerText=taps;}
-render();
-function openM(){document.getElementById('m').style.display='flex'}function closeM(){document.getElementById('m').style.display='none'}
-function openW(){document.getElementById('wAmt').value=bal>=20?bal:'';document.getElementById('w').style.display='flex'}function closeW(){document.getElementById('w').style.display='none'}
-function pay(){
- let a=Number(document.getElementById('amt').value);let e=document.getElementById('email').value.trim();
- if(a<5)return alert('Min GHS 5'); if(!e)return alert('Enter email');
- PaystackPop.setup({
-  key:'pk_live_c3cbce0387fd58c85d6c0940035dba6b9b98724f',email:e,amount:a*100,currency:'GHS',channels:['mobile_money','card'],
-  callback:function(r){bal+=a;localStorage.setItem('lamba_bal',bal);localStorage.setItem('balance',bal);render();closeM();alert('✅ GHS '+a+' Added! Ref:'+r.reference);},
-  onClose:function(){}
- }).openIframe();
+let bal = parseFloat(localStorage.getItem('lamba_bal')||'0');
+
+// Check if registered
+window.onload=()=>{
+ let p=localStorage.getItem('lamba_phone');
+ if(p){
+   document.getElementById('regPage').style.display='none';
+   document.getElementById('userInfo').innerText = p+' | '+localStorage.getItem('lamba_name');
+   // auto fill withdraw
+   document.getElementById('wPhone').value=localStorage.getItem('lamba_phone');
+   document.getElementById('wName').value=localStorage.getItem('lamba_name');
+   document.getElementById('wNetwork').value=localStorage.getItem('lamba_network')||'MTN';
+ }
+ render();
 }
-function startGame(){
- if(playing)return;
- if(bal<2)return alert('Low balance! Deposit at least GHS 5'),openM();
- bal-=2;localStorage.setItem('lamba_bal',bal);localStorage.setItem('balance',bal);render();
- taps=0;timeLeft=10;playing=true;earned=0;document.getElementById('playBtn').innerText='PLAYING...';startTxt.style.display='none';coin.style.display='block';moveCoin();
- timer=setInterval(()=>{timeLeft--;timeEl.innerText=timeLeft+'s';if(timeLeft<=0)endGame();},1000);
+
+function doReg(){
+ let phone=document.getElementById('rPhone').value.trim();
+ let name=document.getElementById('rName').value.trim();
+ let net=document.getElementById('rNet').value;
+ if(!phone||phone.length<10) return alert('Enter valid MoMo number');
+ if(!name) return alert('Enter MoMo name');
+ localStorage.setItem('lamba_phone',phone);
+ localStorage.setItem('lamba_name',name);
+ localStorage.setItem('lamba_network',net);
+ document.getElementById('regPage').style.display='none';
+ location.reload();
 }
-function moveCoin(){coin.style.left=Math.random()*70+5+'%';coin.style.top=Math.random()*65+10+'%';}
-function tap(e){if(!playing)return;taps++;render();moveCoin();if(navigator.vibrate)navigator.vibrate(20);}
-function endGame(){
- clearInterval(timer);playing=false;coin.style.display='none';startTxt.style.display='block';timeEl.innerText='10s';
- earned=Math.min(taps*0.25,15);
- if(taps>=12){bal+=earned;localStorage.setItem('lamba_bal',bal);localStorage.setItem('balance',bal);render();alert('🎉 You tapped '+taps+' times! You WON GHS '+earned.toFixed(2));}
- else{alert('😢 You tapped '+taps+' times. Need 12+ taps to win. Try again!');}
- document.getElementById('playBtn').innerText='PLAY AGAIN - GHS 2';taps=0;render();
-}
+
+function render(){ document.getElementById('bal').innerText=bal.toFixed(2); }
+function playGame(){ bal+=5; localStorage.setItem('lamba_bal',bal); localStorage.setItem('balance',bal); render(); alert('You won GHS 5! Balance: '+bal); }
+function openW(){ document.getElementById('wPage').style.display='flex'; }
+function closeW(){ document.getElementById('wPage').style.display='none'; }
+
 async function withdrawReq(){
- let a=Number(document.getElementById('wAmt').value);
+ let a=parseFloat(document.getElementById('wAmt').value);
  let phone=document.getElementById('wPhone').value.trim();
  let name=document.getElementById('wName').value.trim();
  let network=document.getElementById('wNetwork').value;
- if(!a||a<20)return alert('Min GHS 20');if(a>bal)return alert('Insufficient balance, you have GHS '+bal.toFixed(2));
- if(!phone||phone.length<10)return alert('Enter valid MoMo number');
- if(!name)return alert('Enter MoMo name');
- document.getElementById('wBtn').innerText='Processing...';document.getElementById('wBtn').disabled=true;
+ if(!a||a<20) return alert('Min GHS 20');
+ if(a>bal) return alert('Insufficient balance, you have GHS '+bal.toFixed(2));
+ if(!phone||phone.length<10) return alert('Enter valid MoMo number');
+ if(!name) return alert('Enter MoMo name');
+ document.getElementById('wBtn').innerText='Processing...'; document.getElementById('wBtn').disabled=true;
  try{
-  const res=await fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a,momo_number:phone,name,network})});
+  // FIXED: now sending phone, network, accountName correctly
+  const res=await fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a,phone:phone,network:network,accountName:name})});
   const data=await res.json();
   if(data.success||data.status===true){
-    bal-=a;localStorage.setItem('lamba_bal',bal);localStorage.setItem('balance',bal);render();closeW();
-    alert('✅ SUCCESS! GHS '+a+' sent to '+phone+'. Check your MoMo!');
+   bal-=a;localStorage.setItem('lamba_bal',bal);localStorage.setItem('balance',bal);render();closeW();
+   alert('✅ SUCCESS! GHS '+a+' sent to '+phone+'. Check your MoMo!');
   }else{
-    alert('❌ Failed: '+(data.message||data.error||'Try again'));
-    document.getElementById('wBtn').innerText='WITHDRAW NOW';document.getElementById('wBtn').disabled=false;
+   alert('❌ Failed: '+(data.message||data.error||'Try again'));
+   document.getElementById('wBtn').innerText='WITHDRAW NOW';document.getElementById('wBtn').disabled=false;
   }
  }catch(e){
   alert('Network error: '+e.message);
