@@ -3,112 +3,83 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LAMBAMBA COIN RUSH</title>
-<script src="https://js.paystack.co/v1/inline.js"></script>
 <style>
-body{margin:0;background:#0a0a0a;color:#fff;font-family:Arial}
-.btn{padding:14px;border:0;border-radius:10px;font-weight:bold;width:100%;margin:8px 0;cursor:pointer}
-input,select{width:100%;padding:14px;margin:8px 0;border-radius:8px;border:0;box-sizing:border-box}
-.card{background:#1a1a1a;padding:20px;border-radius:15px;margin:15px}
+body{background:#111;color:white;font-family:Arial;text-align:center;margin:0;padding:20px}
+.card{background:#222;padding:20px;border-radius:20px;max-width:400px;margin:auto}
+button{width:100%;padding:15px;margin:10px 0;border:none;border-radius:12px;font-size:18px;font-weight:bold;cursor:pointer}
+#coin{font-size:150px;cursor:pointer;user-select:none;transition:transform 0.1s}
+#coin:active{transform:scale(0.9)}
 </style>
 </head>
 <body>
-
-<div id="regPage" style="position:fixed;inset:0;background:#111;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
-<div style="background:#222;padding:25px;border-radius:15px;width:100%;max-width:360px">
-<h2 style="color:#00ff88;text-align:center">LAMBAMBA</h2>
-<p style="color:#aaa;text-align:center">Login to play</p>
-<input id="rPhone" placeholder="MoMo Number e.g 0537613225">
-<input id="rName" placeholder="MoMo Name e.g ROMANUS">
-<select id="rNet"><option>MTN</option><option>Vodafone</option><option>AirtelTigo</option></select>
-<button onclick="doReg()" class="btn" style="background:#00c853;color:#fff">ENTER GAME</button>
-</div>
-</div>
-
-<div style="text-align:center;padding:20px">
 <h1>💰 LAMBAMBA COIN RUSH</h1>
 <div class="card">
-<h2>Balance: GHS <span id="bal">0.00</span></h2>
-<p id="userInfo" style="color:#aaa;font-size:13px"></p>
-<button onclick="deposit()" class="btn" style="background:#2962ff;color:#fff;font-size:16px">💳 DEPOSIT GHS 20 TO PLAY</button>
-<button onclick="playGame()" class="btn" style="background:#ff9800;color:#fff;font-size:18px">🎮 PLAY & WIN (Costs GHS 5)</button>
-<button onclick="openW()" class="btn" style="background:#00c853;color:#fff">💸 WITHDRAW WINNINGS</button>
-<p style="color:#666;font-size:12px;margin-top:10px">Deposit first. Winnings withdrawable to MoMo in minutes.</p>
-</div>
+<h2 id="bal">Balance: GHS 219.25</h2>
+<p id="user">0537613225 | ROMANUS</p>
+
+<div id="homeScreen">
+<button style="background:#2563eb;color:white" onclick="deposit()">💳 DEPOSIT GHS 20 TO PLAY</button>
+<button style="background:orange;color:white" onclick="startGame()">🎮 PLAY & WIN (Costs GHS 5)</button>
+<button style="background:#16a34a;color:white" onclick="withdraw()">💸 WITHDRAW WINNINGS</button>
+<p style="color:#666;font-size:13px">Deposit first. Winnings withdrawable to MoMo in minutes.</p>
 </div>
 
-<div id="wPage" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9998;align-items:center;justify-content:center;padding:20px">
-<div style="background:#222;padding:25px;border-radius:15px;width:100%;max-width:360px">
-<h3 style="text-align:center">Withdraw</h3>
-<input id="wAmt" type="number" placeholder="Amount Min GHS 20">
-<input id="wPhone" type="tel"><input id="wName" type="text"><select id="wNetwork"><option>MTN</option><option>Vodafone</option><option>AirtelTigo</option></select>
-<button id="wBtn" onclick="withdrawReq()" class="btn" style="background:#00c853;color:#fff">WITHDRAW NOW</button>
-<button onclick="closeW()" class="btn" style="background:#444;color:#fff">CANCEL</button>
-</div>
+<div id="gameScreen" style="display:none">
+<h3>Tap the coin! 30 seconds!</h3>
+<h2>Time: <span id="time">30</span>s | Coins: <span id="score">0</span></h2>
+<div id="coin" onclick="tap()">🪙</div>
+<h3 id="result"></h3>
+<button style="background:gray" onclick="goHome()">Back Home</button>
 </div>
 
+</div>
 <script>
-const PAYSTACK_PK = "pk_live_c3cbce0387fd58c85d6c0940035dba6b9b98724f";
+let balance = 219.25;
+let score = 0;
+let timeLeft = 30;
+let timer = null;
+let playing = false;
 
-let bal = parseFloat(localStorage.getItem('lamba_bal')||'0');
-window.onload=()=>{
- let p=localStorage.getItem('lamba_phone');
- if(!p) return;
- document.getElementById('regPage').style.display='none';
- document.getElementById('userInfo').innerText = p+' | '+localStorage.getItem('lamba_name');
- document.getElementById('wPhone').value=localStorage.getItem('lamba_phone');
- document.getElementById('wName').value=localStorage.getItem('lamba_name');
- render();
+function updateBal(){ document.getElementById('bal').innerText = 'Balance: GHS ' + balance.toFixed(2); }
+
+function startGame(){
+ if(balance < 5){ alert('Deposit first!'); return; }
+ balance -= 5; updateBal();
+ document.getElementById('homeScreen').style.display='none';
+ document.getElementById('gameScreen').style.display='block';
+ score=0; timeLeft=30; playing=true;
+ document.getElementById('score').innerText=score;
+ document.getElementById('time').innerText=timeLeft;
+ document.getElementById('result').innerText='';
+ clearInterval(timer);
+ timer = setInterval(()=>{
+   timeLeft--; document.getElementById('time').innerText=timeLeft;
+   if(timeLeft<=0){ endGame(); }
+ },1000);
 }
-function doReg(){
- let phone=document.getElementById('rPhone').value.trim();
- let name=document.getElementById('rName').value.trim();
- let net=document.getElementById('rNet').value;
- if(phone.length<10||!name) return alert('Enter valid number and name');
- localStorage.setItem('lamba_phone',phone);localStorage.setItem('lamba_name',name);localStorage.setItem('lamba_network',net);
- location.reload();
+function tap(){
+ if(!playing) return;
+ score++; document.getElementById('score').innerText=score;
+ // vibration effect
+ navigator.vibrate && navigator.vibrate(30);
 }
-function render(){ document.getElementById('bal').innerText=bal.toFixed(2); }
-function deposit(){
- let email = localStorage.getItem('lamba_phone')+'@lambamba.com';
- let handler = PaystackPop.setup({
-   key: PAYSTACK_PK,
-   email: email,
-   amount: 2000,
-   currency: "GHS",
-   callback: function(res){
-     bal+=20; localStorage.setItem('lamba_bal',bal); render();
-     alert('✅ Deposit Success! GHS 20 added.');
-     fetch('/api/verify?reference='+res.reference);
-   },
-   onClose: function(){}
- });
- handler.openIframe();
+function endGame(){
+ playing=false; clearInterval(timer);
+ let win = score * 0.1; // 10 pesewas per tap
+ balance += win; updateBal();
+ document.getElementById('result').innerText = `You tapped ${score} times! Won GHS ${win.toFixed(2)}!`;
 }
-function playGame(){
- if(bal<5) return alert('Deposit GHS 20 first! You need at least GHS 5 to play.');
- bal-=5;
- let win = Math.random() > 0.4 ? 8 : 0;
- bal+=win;
- localStorage.setItem('lamba_bal',bal); render();
- if(win>0) alert('You WON GHS '+win+'! Balance: '+bal);
- else alert('You lost GHS 5. Try again! Balance: '+bal);
+function goHome(){
+ clearInterval(timer); playing=false;
+ document.getElementById('gameScreen').style.display='none';
+ document.getElementById('homeScreen').style.display='block';
 }
-function openW(){ document.getElementById('wPage').style.display='flex'; }
-function closeW(){ document.getElementById('wPage').style.display='none'; }
-async function withdrawReq(){
- let a=parseFloat(document.getElementById('wAmt').value);
- let phone=document.getElementById('wPhone').value.trim();
- let name=document.getElementById('wName').value.trim();
- let network=document.getElementById('wNetwork').value;
- if(!a||a<20) return alert('Min GHS 20');
- if(a>bal) return alert('Insufficient balance');
- document.getElementById('wBtn').innerText='Processing...';document.getElementById('wBtn').disabled=true;
- try{
-  const res=await fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:a,phone,network,accountName:name})});
-  const data=await res.json();
-  if(data.success){ bal-=a;localStorage.setItem('lamba_bal',bal);render();closeW();alert('✅ Withdraw request sent! You will receive GHS '+a+' to '+phone); }
-  else{ alert('❌ '+(data.message||data.error)); document.getElementById('wBtn').innerText='WITHDRAW NOW';document.getElementById('wBtn').disabled=false; }
- }catch(e){ alert('Error '+e.message); document.getElementById('wBtn').innerText='WITHDRAW NOW';document.getElementById('wBtn').disabled=false; }
+function deposit(){ window.location.href='/api/paystack-init'; }
+function withdraw(){
+ let amt = prompt('How much to withdraw? Balance: '+balance);
+ if(!amt) return;
+ fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt,phone:'0537613225'})})
+ .then(r=>r.json()).then(d=>alert(d.message||'Request sent!'));
 }
 </script>
 </body>
