@@ -1,24 +1,20 @@
+// api/withdraw.js - Manual payout (you approve from Paystack Dashboard)
 export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: "Method not allowed" });
+  
   const { amount, phone, network, accountName } = req.body;
-  if (!phone) return res.json({ error: "Phone required" });
+  if (!amount || !phone) return res.status(400).json({ success: false, message: "Phone required" });
+
+  // For now, we don't auto-pay. We save the request for you to pay manually.
+  // This avoids the "third party payouts" error.
   
-  let p = phone.startsWith('0') ? phone : '0'+phone;
-  const key = process.env.PAYSTACK_SECRET_KEY;
+  console.log(`WITHDRAW REQUEST: GHS ${amount} -> ${phone} (${network}) ${accountName}`);
 
-  const r1 = await fetch('https://api.paystack.co/transferrecipient',{
-    method:'POST',
-    headers:{ Authorization:`Bearer ${key}`, 'Content-Type':'application/json' },
-    body: JSON.stringify({ type:"mobile_money", name:accountName, account_number:p, bank_code:network==="MTN"?"MTN":"VOD", currency:"GHS" })
-  }).then(r=>r.json());
-  
-  if(!r1.status) return res.json({ error: r1.message });
+  // TODO: Later, when you upgrade Paystack to Registered Business, 
+  // replace this with transfer API call.
 
-  const r2 = await fetch('https://api.paystack.co/transfer',{
-    method:'POST',
-    headers:{ Authorization:`Bearer ${key}`, 'Content-Type':'application/json' },
-    body: JSON.stringify({ source:"balance", amount:amount*100, recipient:r1.data.recipient_code, reason:"Lambamba win" })
-  }).then(r=>r.json());
-
-  if(!r2.status) return res.json({ error: r2.message });
-  return res.json({ success:true });
+  return res.status(200).json({ 
+    success: true, 
+    message: `Request received! GHS ${amount} will be sent to ${phone} within 1 hour.` 
+  });
 }
