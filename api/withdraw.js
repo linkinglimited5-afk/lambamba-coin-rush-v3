@@ -1,20 +1,30 @@
-// api/withdraw.js - Manual payout (you approve from Paystack Dashboard)
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: "Method not allowed" });
-  
-  const { amount, phone, network, accountName } = req.body;
-  if (!amount || !phone) return res.status(400).json({ success: false, message: "Phone required" });
+let withdrawals = global.withdrawals || [];
+global.withdrawals = withdrawals;
 
-  // For now, we don't auto-pay. We save the request for you to pay manually.
-  // This avoids the "third party payouts" error.
-  
-  console.log(`WITHDRAW REQUEST: GHS ${amount} -> ${phone} (${network}) ${accountName}`);
-
-  // TODO: Later, when you upgrade Paystack to Registered Business, 
-  // replace this with transfer API call.
-
-  return res.status(200).json({ 
-    success: true, 
-    message: `Request received! GHS ${amount} will be sent to ${phone} within 1 hour.` 
-  });
+export default function handler(req, res) {
+  if (req.method === 'PUT') {
+    const { id, action } = req.body;
+    const item = withdrawals.find(w => w.id === id);
+    if(item) item.status = action;
+    return res.json(item);
+  }
+  if (req.method === 'GET') {
+    return res.json(withdrawals);
+  }
+  // POST = new withdrawal request
+  const { amount, phone } = req.body;
+  if (parseFloat(amount) < 50) {
+    return res.status(400).json({ message: 'Minimum withdrawal is GHS 50. Keep playing!' });
+  }
+  const newReq = {
+    id: Date.now().toString(),
+    amount: parseFloat(amount),
+    payAmount: parseFloat(amount) - 2,
+    phone,
+    status: 'pending',
+    date: new Date().toLocaleString()
+  };
+  withdrawals.unshift(newReq);
+  global.withdrawals = withdrawals;
+  return res.json({ message: `Request GHS ${amount} sent! You get GHS ${newReq.payAmount} (GHS 2 fee). Within 24h.` });
 }
