@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lambamba Admin</title>
+<style>
+body{margin:0;font-family:Arial;background:#0f0f1a;color:#fff;padding:20px}
+h1{color:#00d26a;text-align:center}
+.top{text-align:center;margin-bottom:20px}
+.card{background:#1e1e32;padding:15px;border-radius:12px;margin:12px auto;max-width:650px;border-left:6px solid orange;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.card.approved{border-left-color:#00d26a;opacity:0.7}
+.card.rejected{border-left-color:red;opacity:0.7}
+.btn{padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:3px}
+.approve{background:#00d26a;color:#fff}
+.reject{background:#ff2e2e;color:#fff}
+.refresh{background:#2a2a4a;color:#fff;padding:12px 25px;border-radius:8px;border:none;cursor:pointer;font-weight:bold}
+small{color:#aaa}
+</style>
+</head>
+<body>
+<h1>💰 LAMBAMBA ADMIN</h1>
+<div class="top">
+<button class="refresh" onclick="load()">🔄 Refresh Requests</button>
+<p>Link: lambamba-coin-rush-v3.vercel.app/admin.html - Keep Private</p>
+</div>
+<div id="list">Loading...</div>
+<script>
+async function load(){
+  const res = await fetch('/api/withdraw');
+  const data = await res.json();
+  const box = document.getElementById('list');
+  if(!data || data.length === 0){ box.innerHTML = '<p style=text-align:center>No withdrawals yet</p>'; return; }
+  box.innerHTML = data.reverse().map(w => `
+    <div class="card ${w.status}">
+      <div>
+        <b style="font-size:18px">GHS ${w.amount} (Pay GHS ${w.payAmount})</b><br>
+        📱 <b>${w.phone}</b><br>
+        <small>${w.date}</small><br>
+        Status: <b>${w.status.toUpperCase()}</b>
+      </div>
+      <div>
+        ${w.status === 'pending' ? `
+          <button class="btn approve" onclick="doAction('${w.id}','approved')">✅ APPROVE</button>
+          <button class="btn reject" onclick="doAction('${w.id}','rejected')">❌ REJECT</button>
+        ` : `<b>${w.status.toUpperCase()}</b>`}
+      </div>
+    </div>
+  `).join('');
+}
+async function doAction(id, action){
+  if(action === 'approved' && !confirm('Have you sent the MoMo money? Click OK only after sending.')) return;
+  if(action === 'rejected' && !confirm('Reject this withdrawal?')) return;
+  await fetch('/api/withdraw',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,action})});
+  load();
+}
+load();
+setInterval(load, 5000);
+</script>
+</body>
+</html>
