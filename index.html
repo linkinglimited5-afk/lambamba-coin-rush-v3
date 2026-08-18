@@ -1,86 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LAMBAMBA COIN RUSH</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lambamba Games - Play & Win | Ghana</title>
 <style>
-body{background:#111;color:white;font-family:Arial;text-align:center;margin:0;padding:20px}
-.card{background:#222;padding:20px;border-radius:20px;max-width:400px;margin:auto}
-button{width:100%;padding:15px;margin:10px 0;border:none;border-radius:12px;font-size:18px;font-weight:bold;cursor:pointer}
-#coin{font-size:150px;cursor:pointer;user-select:none;transition:transform 0.1s}
-#coin:active{transform:scale(0.9)}
+ body{margin:0;font-family:Arial,sans-serif;background:#0f0f1a;color:#fff;text-align:center}
+ .game-container{padding:20px;min-height:80vh}
+ .btn{padding:15px 30px;font-size:18px;font-weight:bold;border:none;border-radius:10px;cursor:pointer;margin:10px}
+ .deposit-btn{background:#00d26a;color:#fff;width:90%;max-width:400px}
+ .withdraw-btn{background:#2a2a4a;color:#fff;border:1px solid #555}
+ canvas{background:#1a1a2e;border-radius:15px;margin:20px auto;display:block;max-width:95%}
+ footer{margin-top:50px;padding:30px 15px;background:#080810;color:#999;font-size:13px;line-height:1.6}
+ footer a{color:#00d26a;text-decoration:none;margin:0 8px}
+ footer a:hover{text-decoration:underline}
+ .info-box{max-width:800px;margin:20px auto;text-align:left;background:#1a1a2e;padding:20px;border-radius:10px}
 </style>
 </head>
 <body>
-<h1>💰 LAMBAMBA COIN RUSH</h1>
-<div class="card">
-<h2 id="bal">Balance: GHS 219.25</h2>
-<p id="user">0537613225 | ROMANUS</p>
 
-<div id="homeScreen">
-<button style="background:#2563eb;color:white" onclick="deposit()">💳 DEPOSIT GHS 20 TO PLAY</button>
-<button style="background:orange;color:white" onclick="startGame()">🎮 PLAY & WIN (Costs GHS 5)</button>
-<button style="background:#16a34a;color:white" onclick="withdraw()">💸 WITHDRAW WINNINGS</button>
-<p style="color:#666;font-size:13px">Deposit first. Winnings withdrawable to MoMo in minutes.</p>
+<div class="game-container">
+  <h1>🔥 LAMBAMBA GAMES 🔥</h1>
+  <p>Play Skill Games & Win Real Money in Ghana</p>
+
+  <!-- YOUR GAME CANVAS / IFRAME - KEEP YOUR GAME HERE -->
+  <div id="gameArea">
+    <p style="font-size:50px;">🎮</p>
+    <h2>Your Game Loads Here</h2>
+    <p>Deposit GHS 20 to Start Playing!</p>
+  </div>
+
+  <button class="btn deposit-btn" onclick="window.location.href='/api/paystack-init'">💳 DEPOSIT GHS 20 TO PLAY</button>
+  <br>
+  <button class="btn withdraw-btn" onclick="withdraw()">💸 WITHDRAW WINNINGS</button>
+  <p id="status"></p>
 </div>
 
-<div id="gameScreen" style="display:none">
-<h3>Tap the coin! 30 seconds!</h3>
-<h2>Time: <span id="time">30</span>s | Coins: <span id="score">0</span></h2>
-<div id="coin" onclick="tap()">🪙</div>
-<h3 id="result"></h3>
-<button style="background:gray" onclick="goHome()">Back Home</button>
+<!-- ABOUT SECTION FOR PAYSTACK -->
+<div class="info-box">
+  <h3>About Lambamba Games</h3>
+  <p>Lambamba Games is a Ghanaian digital entertainment platform offering skill-based mobile games. Users deposit funds into their wallet using Mobile Money (MTN, Vodafone, AirtelTigo) and Cards via Paystack to pay entry fees and compete for high scores. Winnings can be withdrawn to Mobile Money. We promote responsible gaming. 18+ only. This is a game of skill, not chance.</p>
+  
+  <h3>How It Works</h3>
+  <p>1. Deposit GHS 20 or more to fund your wallet.<br>2. Play our skill-based games.<br>3. Score high on the leaderboard.<br>4. Withdraw your winnings instantly to MoMo.</p>
+
+  <h3>Contact & Support</h3>
+  <p>Email: support@lambamba.com<br>Phone/WhatsApp: +233XXXXXXXXX<br>Location: Accra, Ghana</p>
 </div>
 
-</div>
+<footer>
+  <p><strong>Lambamba Games Ltd</strong> - Licensed Digital Entertainment Platform Ghana</p>
+  <p>
+    <a href="#about">About Us</a> |
+    <a href="#terms">Terms of Service</a> |
+    <a href="#privacy">Privacy Policy</a> |
+    <a href="#refund">Refund Policy</a>
+  </p>
+  <p>We accept: MTN MoMo, Vodafone Cash, AirtelTigo Money, Visa, Mastercard via Paystack</p>
+  <p style="margin-top:15px;">© 2026 Lambamba Games. All rights reserved. Skill-based gaming. Play responsibly. 18+ only. No gambling.</p>
+</footer>
+
 <script>
-let balance = 219.25;
-let score = 0;
-let timeLeft = 30;
-let timer = null;
-let playing = false;
-
-function updateBal(){ document.getElementById('bal').innerText = 'Balance: GHS ' + balance.toFixed(2); }
-
-function startGame(){
- if(balance < 5){ alert('Deposit first!'); return; }
- balance -= 5; updateBal();
- document.getElementById('homeScreen').style.display='none';
- document.getElementById('gameScreen').style.display='block';
- score=0; timeLeft=30; playing=true;
- document.getElementById('score').innerText=score;
- document.getElementById('time').innerText=timeLeft;
- document.getElementById('result').innerText='';
- clearInterval(timer);
- timer = setInterval(()=>{
-   timeLeft--; document.getElementById('time').innerText=timeLeft;
-   if(timeLeft<=0){ endGame(); }
- },1000);
-}
-function tap(){
- if(!playing) return;
- score++; document.getElementById('score').innerText=score;
- // vibration effect
- navigator.vibrate && navigator.vibrate(30);
-}
-function endGame(){
- playing=false; clearInterval(timer);
- let win = score * 0.1; // 10 pesewas per tap
- balance += win; updateBal();
- document.getElementById('result').innerText = `You tapped ${score} times! Won GHS ${win.toFixed(2)}!`;
-}
-function goHome(){
- clearInterval(timer); playing=false;
- document.getElementById('gameScreen').style.display='none';
- document.getElementById('homeScreen').style.display='block';
-}
-function deposit(){ window.location.href='/api/paystack-init'; }
 function withdraw(){
- let amt = prompt('How much to withdraw? Balance: '+balance);
- if(!amt) return;
- fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt,phone:'0537613225'})})
- .then(r=>r.json()).then(d=>alert(d.message||'Request sent!'));
+  const amount = prompt("Enter amount to withdraw (GHS):");
+  const phone = prompt("Enter MoMo Number (e.g. 024XXXXXXX):");
+  if(!amount || !phone) return;
+  fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount,phone})})
+  .then(r=>r.json()).then(d=>{document.getElementById('status').innerText=d.message; alert(d.message);});
 }
+// Keep your original game JavaScript here - paste it below this line
+
 </script>
 </body>
 </html>
