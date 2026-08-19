@@ -9,7 +9,7 @@ body{margin:0;background:#0f172a;color:#fff;font-family:Arial;overflow:hidden;te
 #topbar{display:flex;justify-content:space-between;padding:12px;background:#1e293b;font-weight:bold}
 #goldDisplay{color:#facc15;font-size:18px}
 canvas{display:block;margin:0 auto;background:linear-gradient(#38bdf8,#0f172a);touch-action:none}
-#controls{position:fixed;bottom:10px;width:100%;display:flex;justify-content:center;gap:10px}
+#controls{position:fixed;bottom:10px;width:100%;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
 button{padding:12px 18px;border:none;border-radius:12px;font-weight:bold;background:#facc15;color:#000}
 #withdraw{background:#22c55e;color:#fff}
 </style>
@@ -26,55 +26,43 @@ button{padding:12px 18px;border:none;border-radius:12px;font-weight:bold;backgro
 <button onclick="move(1)">➡️</button>
 <button id="withdraw" onclick="withdrawCash()">💸 WITHDRAW</button>
 </div>
-
 <script>
-// === FIX 3: PERMANENT BALANCE ===
+// === PERMANENT BALANCE - FIXED ===
 let user_id = localStorage.getItem('user_id');
 if(!user_id){ user_id='LAMBAMBA-'+Date.now(); localStorage.setItem('user_id',user_id); }
 let gold = parseFloat(localStorage.getItem('lambamba_balance')) || 22.50;
 const goldEl = document.getElementById('goldDisplay');
 function saveGold(){ localStorage.setItem('lambamba_balance', gold); goldEl.innerText='GHS '+gold.toFixed(2); }
 saveGold();
-
-// === GAME ENGINE ===
 const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
 let lane=1, lanes=[60,180,300];
 let player={x:lanes[1],y:500,vy:0,jumping:false, jump(){if(!this.jumping){this.vy=-18;this.jumping=true}}};
 let coins=[], obstacles=[], score=0;
-
 function move(dir){ lane=Math.max(0,Math.min(2,lane+dir)); }
 function spawn(){ if(Math.random()<0.05) coins.push({x:lanes[Math.floor(Math.random()*3)],y:-20}); if(Math.random()<0.02) obstacles.push({x:lanes[Math.floor(Math.random()*3)],y:-30}); }
-
 function loop(){
  ctx.clearRect(0,0,400,600);
- // player lane move
  player.x += (lanes[lane]-player.x)*0.2;
  player.y+=player.vy; player.vy+=0.8; if(player.y>=500){player.y=500;player.vy=0;player.jumping=false;}
- // draw player
  ctx.fillStyle='#facc15'; ctx.fillRect(player.x-15,player.y-25,30,30);
- // coins
  spawn();
  for(let i=coins.length-1;i>=0;i--){ let c=coins[i]; c.y+=5; ctx.beginPath(); ctx.arc(c.x,c.y,10,0,6.28); ctx.fillStyle='gold'; ctx.fill(); if(Math.abs(c.x-player.x)<20 && Math.abs(c.y-player.y)<20){ coins.splice(i,1); gold+=0.10; score+=10; saveGold(); continue; } if(c.y>620) coins.splice(i,1); }
- // obstacles
- for(let i=obstacles.length-1;i>=0;i--){ let o=obstacles[i]; o.y+=5; ctx.fillStyle='#ef4444'; ctx.fillRect(o.x-15,o.y-15,30,30); if(Math.abs(o.x-player.x)<20 && Math.abs(o.y-player.y)<20){ if(gold>0.5) {gold-=0.50; saveGold();} obstacles.splice(i,1); } if(o.y>620) obstacles.splice(i,1); }
+ for(let i=obstacles.length-1;i>=0;i--){ let o=obstacles[i]; o.y+=5; ctx.fillStyle='#ef4444'; ctx.fillRect(o.x-15,o.y-15,30,30); if(Math.abs(o.x-player.x)<20 && Math.abs(o.y-player.y)<20){ if(gold>0.5){gold-=0.50; saveGold();} obstacles.splice(i,1); } if(o.y>620) obstacles.splice(i,1); }
  requestAnimationFrame(loop);
 }
 loop();
-
-// === FIX 2: WHATSAPP WITHDRAW FIXED ===
+// === WHATSAPP WITHDRAW - FIXED WITH YOUR NUMBERS ===
 function withdrawCash(){
  if(gold < 10){ alert('Minimum GHS 10 to withdraw! Your balance: GHS '+gold.toFixed(2)); return; }
- let momo = prompt('Enter MoMo Number (e.g. 0551234567):');
+ let momo = prompt('Enter MoMo Number to receive cash:');
  if(!momo) return;
  let amount = gold.toFixed(2);
- // REPLACE 233555123456 WITH YOUR NUMBER
- let myNumber = '233555123456';
- let msg = `LAMBAMBA WITHDRAW REQUEST%0A%0AAmount: GHS ${amount}%0AMoMo: ${momo}%0AUserID: ${user_id}%0AScore: ${score}`;
+ let myNumber = '233537613225';
+ let backupNumber = '233209157076';
+ let msg = `LAMBAMBA WITHDRAW REQUEST%0A%0AAmount: GHS ${amount}%0AMoMo: ${momo}%0AUserID: ${user_id}%0AScore: ${score}%0ABackup: ${backupNumber}`;
  let url = `https://api.whatsapp.com/send?phone=${myNumber}&text=${msg}`;
  window.open(url, '_blank');
- alert('✅ Request sent! You will receive GHS '+amount+' in 5 mins. Balance reset after approval.');
- // Optional: deduct after request
- // gold = 0; saveGold();
+ alert('✅ Request sent to 0537613225! You will receive GHS '+amount+' in 5 mins.');
 }
 </script>
 </body>
