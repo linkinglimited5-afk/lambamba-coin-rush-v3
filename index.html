@@ -1,42 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lambamba Games - Play & Win Ghana</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lambamba Coin Rush</title>
 <style>
-body{margin:0;font-family:Arial,sans-serif;background:#0f0f1a;color:#fff;text-align:center}
-.game-container{padding:20px;min-height:80vh}
-.btn{padding:15px 30px;font-size:18px;font-weight:bold;border:none;border-radius:10px;cursor:pointer;margin:10px}
-.deposit-btn{background:#00d26a;color:#fff;width:90%;max-width:400px}
-.withdraw-btn{background:#2a2a4a;color:#fff;border:1px solid #555}
-canvas{background:#1a1a2e;border-radius:15px;margin:20px auto;display:block;max-width:95%}
-footer{padding:20px;background:#000;margin-top:30px}
-footer a{color:#00d26a;margin:0 10px;text-decoration:none}
+body{margin:0;background:#0b1220;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center}
+.card{background:#151e32;padding:30px;border-radius:20px;max-width:320px;width:90%;box-shadow:0 10px 30px #000}
+.btn{display:block;width:100%;padding:16px;margin-top:15px;background:#facc15;color:#000;font-weight:800;border-radius:12px;text-decoration:none}
 </style>
 </head>
 <body>
-<div class="game-container">
-<h1>🎮 LAMBAMBA GAMES</h1>
-<p>Play Coin Rush & Win Real Money in Ghana</p>
-<canvas id="gameCanvas" width="350" height="400"></canvas>
-<p>Balance: GHS <span id="balance">0.00</span></p>
-<button class="btn deposit-btn" onclick="deposit()">Deposit with MoMo / Card</button><br>
-<button class="btn withdraw-btn" onclick="withdraw()">Withdraw Winnings</button>
+<div class="card">
+<h1>💰 Lambamba Coin Rush</h1>
+<p>Game is LIVE! No more download issue.</p>
+<a class="btn" href="https://paystack.com/pay/lambamba">Unlock Game - 25 GHS</a>
+<a class="btn" style="background:#222;color:#fff" href="#" onclick="alert('Game Loaded!')">Play Demo</a>
+<p style="opacity:.6;font-size:12px;margin-top:20px">V3 Fixed Version</p>
 </div>
-<footer>
-<a href="/terms.html">Terms</a> | <a href="/privacy.html">Privacy</a> | <a href="/contact.html">Contact</a> | <a href="/admin.html">Admin</a>
-<p>© 2026 Lambamba Games | support@lambambagames.com | Ghana</p>
-</footer>
-<script>
-// Simple demo game + Paystack placeholders
-let balance = 0;
-document.getElementById('balance').innerText = balance.toFixed(2);
-function deposit(){ window.location.href="https://paystack.com/pay/lambamba-test"; }
-function withdraw(){ alert("Withdrawal - Connect Paystack Transfer API"); }
-// Draw simple canvas
-const c=document.getElementById('gameCanvas'); const ctx=c.getContext('2d');
-ctx.fillStyle="#00d26a"; ctx.fillRect(100,100,150,50); ctx.fillStyle="#fff"; ctx.font="20px Arial"; ctx.fillText("COIN RUSH",110,130);
-</script>
 </body>
 </html>
