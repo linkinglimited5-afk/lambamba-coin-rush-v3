@@ -1,11 +1,1 @@
-<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title>Privacy - Lambamba Games</title>
-<style>body{font-family:Arial;max-width:800px;margin:40px auto;padding:20px;line-height:1.6}</style>
-</head><body>
-<h1>Privacy Policy - Lambamba Games</h1>
-<p>We respect your privacy.</p>
-<h2>Data Collected</h2><p>We collect email, phone, game progress, and transaction data to provide our service.</p>
-<h2>Payment Data</h2><p>Payments are processed by Paystack. We do not store card or MoMo PINs.</p>
-<h2>Contact</h2><p>To delete data, email xmtrade522@gmail.com</p>
-<p><a href="/">Back to Game</a></p>
-</body></html>
+<!DOCTYPE html><html><head><title>Privacy</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{font-family:Arial;padding:20px;line-height:1.6;max-width:800px;margin:auto}</style></head><body><h1>Privacy Policy</h1><p>We collect name, email, phone for payments via Paystack. We do not share data. Secured by SSL. Contact: support@lambambagames.com</p><a href="/">Back to Game</a></body></html>
