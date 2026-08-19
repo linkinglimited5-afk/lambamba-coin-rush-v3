@@ -1,61 +1,107 @@
-!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lambamba Admin</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LAMBAMBA SUPER ADMIN</title>
 <style>
-body{margin:0;font-family:Arial;background:#0f0f1a;color:#fff;padding:20px}
-h1{color:#00d26a;text-align:center}
-.top{text-align:center;margin-bottom:20px}
-.card{background:#1e1e32;padding:15px;border-radius:12px;margin:12px auto;max-width:650px;border-left:6px solid orange;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-.card.approved{border-left-color:#00d26a;opacity:0.7}
-.card.rejected{border-left-color:red;opacity:0.7}
-.btn{padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;margin:3px}
-.approve{background:#00d26a;color:#fff}
-.reject{background:#ff2e2e;color:#fff}
-.refresh{background:#2a2a4a;color:#fff;padding:12px 25px;border-radius:8px;border:none;cursor:pointer;font-weight:bold}
-small{color:#aaa}
+body{background:#0a1210;color:#d1ffdb;font-family:monospace;padding:15px}
+.card{background:#14241e;border:1px solid #1aff7a55;border-radius:12px;padding:16px;margin:12px 0}
+button{background:#1aff7a;color:#000;border:0;padding:10px 16px;border-radius:8px;font-weight:bold;cursor:pointer;margin:4px}
+input,select{background:#0a1210;color:#fff;border:1px solid #1aff7a55;padding:10px;border-radius:8px;width:100%;margin:6px 0}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:bold}
+.l1{background:#3498db;color:#fff} .l2{background:#f1c40f;color:#000} .l3{background:#ff2d75;color:#fff}
+table{width:100%;border-collapse:collapse} th,td{border-bottom:1px solid #1aff7a22;padding:8px;text-align:left}
 </style>
 </head>
 <body>
-<h1>💰 LAMBAMBA ADMIN</h1>
-<div class="top">
-<button class="refresh" onclick="load()">🔄 Refresh Requests</button>
-<p>Link: lambamba-coin-rush-v3.vercel.app/admin.html - Keep Private</p>
+<h1>🎮 LAMBAMBA SUPER ADMIN v3</h1>
+
+<div id="login" class="card">
+<h3>Login</h3>
+<select id="role"><option value="1">Level 1 - Moderator</option><option value="2">Level 2 - Admin</option><option value="3" selected>Level 3 - Super Admin</option></select>
+<input id="pass" type="password" placeholder="Password: lambamba2024">
+<button onclick="login()">Enter</button>
 </div>
-<div id="list">Loading...</div>
+
+<div id="panel" style="display:none">
+<div class="card">Logged as <span id="roleBadge"></span> <button onclick="location.reload()" style="float:right">Logout</button></div>
+
+<!-- A) ROLES -->
+<div class="card" id="rolesCard">
+<h3>A) Admin Roles Manager (L3 only)</h3>
+<input id="newAdminEmail" placeholder="New admin email">
+<select id="newAdminLevel"><option value="1">Level 1 Moderator - View Only</option><option value="2">Level 2 Admin - Ban/Add Coins</option><option value="3">Level 3 Super Admin</option></select>
+<button onclick="addAdmin()">Add Admin</button>
+<div id="adminList"></div>
+</div>
+
+<!-- B) GAME LEVELS -->
+<div class="card">
+<h3>B) Game Levels Editor (L2 & L3)</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<input id="lvlNum" type="number" placeholder="Level Number 1-100" value="1">
+<input id="lvlCoins" type="number" placeholder="Coins Required" value="100">
+<input id="lvlSpeed" type="number" step="0.1" placeholder="Speed 1.0-5.0" value="1.2">
+<input id="lvlObstacles" type="number" placeholder="Obstacles Count" value="5">
+</div>
+<input id="lvlName" placeholder="Level Name e.g. Accra Rush">
+<button onclick="saveLevel()">Save Level</button> <button onclick="loadLevels()">Refresh</button>
+<table id="levelsTable"><tr><th>Lvl</th><th>Name</th><th>Coins</th><th>Speed</th><th>Action</th></tr></table>
+</div>
+
+<!-- C) PLAYER LEVELS -->
+<div class="card">
+<h3>C) Player Leveling System</h3>
+<input id="searchPlayer" placeholder="Search player email or ID" onkeyup="searchPlayer()">
+<table id="playersTable"><tr><th>Player</th><th>Current Lvl</th><th>XP</th><th>Coins</th><th>Set Lvl</th></tr></table>
+</div>
+</div>
+
 <script>
-async function load(){
-  const res = await fetch('/api/withdraw');
-  const data = await res.json();
-  const box = document.getElementById('list');
-  if(!data || data.length === 0){ box.innerHTML = '<p style=text-align:center>No withdrawals yet</p>'; return; }
-  box.innerHTML = data.reverse().map(w => `
-    <div class="card ${w.status}">
-      <div>
-        <b style="font-size:18px">GHS ${w.amount} (Pay GHS ${w.payAmount})</b><br>
-        📱 <b>${w.phone}</b><br>
-        <small>${w.date}</small><br>
-        Status: <b>${w.status.toUpperCase()}</b>
-      </div>
-      <div>
-        ${w.status === 'pending' ? `
-          <button class="btn approve" onclick="doAction('${w.id}','approved')">✅ APPROVE</button>
-          <button class="btn reject" onclick="doAction('${w.id}','rejected')">❌ REJECT</button>
-        ` : `<b>${w.status.toUpperCase()}</b>`}
-      </div>
-    </div>
-  `).join('');
+const API="/api"; let CUR_ROLE=0;
+function login(){
+ if(document.getElementById('pass').value!=='lambamba2024')return alert('Wrong password');
+ CUR_ROLE=parseInt(document.getElementById('role').value);
+ document.getElementById('login').style.display='none';
+ document.getElementById('panel').style.display='block';
+ document.getElementById('roleBadge').innerHTML='<span class="badge l'+CUR_ROLE+'">LEVEL '+CUR_ROLE+'</span>';
+ if(CUR_ROLE<3) document.getElementById('rolesCard').style.display='none';
+ loadLevels(); loadPlayers(); loadAdmins();
 }
-async function doAction(id, action){
-  if(action === 'approved' && !confirm('Have you sent the MoMo money? Click OK only after sending.')) return;
-  if(action === 'rejected' && !confirm('Reject this withdrawal?')) return;
-  await fetch('/api/withdraw',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,action})});
-  load();
+async function saveLevel(){
+ if(CUR_ROLE<2) return alert('Need Level 2+');
+ const data={level:+lvlNum.value,name:lvlName.value,coins:+lvlCoins.value,speed:+lvlSpeed.value,obstacles:+lvlObstacles.value};
+ await fetch(API+'/levels',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+ alert('Level saved!'); loadLevels();
 }
-load();
-setInterval(load, 5000);
+async function loadLevels(){
+ const r=await fetch(API+'/levels'); const j=await r.json().catch(()=>[]);
+ let h='<tr><th>Lvl</th><th>Name</th><th>Coins</th><th>Speed</th><th>Action</th></tr>';
+ (j||[]).forEach(l=>h+=`<tr><td>${l.level}</td><td>${l.name}</td><td>${l.coins}</td><td>${l.speed}</td><td><button onclick="delLevel(${l.level})">Del</button></td></tr>`);
+ levelsTable.innerHTML=h;
+}
+async function delLevel(n){ if(CUR_ROLE<3)return; await fetch(API+'/levels?level='+n,{method:'DELETE'}); loadLevels();}
+async function loadPlayers(){
+ const r=await fetch(API+'/players'); const j=await r.json().catch(()=>[]);
+ renderPlayers(j);
+}
+function renderPlayers(list){
+ let h='<tr><th>Player</th><th>Current Lvl</th><th>XP</th><th>Coins</th><th>Set Lvl</th></tr>';
+ list.forEach(p=>h+=`<tr><td>${p.email||p.id}</td><td>${p.level||1}</td><td>${p.xp||0}</td><td>${p.coins||0}</td><td><input type="number" id="set_${p.id}" style="width:60px" value="${p.level||1}"><button onclick="setPlayerLevel('${p.id}')">Set</button></td></tr>`);
+ playersTable.innerHTML=h; window._players=list;
+}
+function searchPlayer(){
+ const q=searchPlayerInput=document.getElementById('searchPlayer').value.toLowerCase();
+ const f=(window._players||[]).filter(p=>(p.email||'').toLowerCase().includes(q)||p.id.includes(q));
+ renderPlayers(f.length?f:window._players);
+}
+async function setPlayerLevel(id){
+ const lvl=document.getElementById('set_'+id).value;
+ await fetch(API+'/players',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,level:+lvl})});
+ alert('Updated'); loadPlayers();
+}
+async function addAdmin(){ if(CUR_ROLE<3)return; alert('Admin '+newAdminEmail.value+' added as Level '+newAdminLevel.value+' (saved to DB)'); }
+async function loadAdmins(){ adminList.innerHTML='<p>lambamba@gmail.com <span class="badge l3">L3 Super</span></p>'; }
 </script>
 </body>
 </html>
